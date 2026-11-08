@@ -7,7 +7,7 @@ import { Cliente, Equipo, Tecnico, Ticket } from '../modelos/modelos';
   providedIn: 'root'
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'https://samtech-tickets-api.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 
