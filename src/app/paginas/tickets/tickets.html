@@ -1,0 +1,308 @@
+<header class="pagina-cabecera">
+  <div>
+    <h1>Tablero de tickets</h1>
+    <p class="subtitulo">Equipos en el taller, desde el ingreso hasta la entrega.</p>
+  </div>
+  <button type="button" class="btn-ed-primary" (click)="nuevo()">+ Nuevo ticket</button>
+</header>
+
+<!-- Resumen -->
+<section class="kpis" aria-label="Resumen del taller">
+  <article class="kpi kpi-cian">
+    <div class="ed-label">Equipos activos en taller</div>
+    <p class="kpi-numero">{{ datos.ticketsEnTaller() }}</p>
+    <small>Excluye entregados y devueltos</small>
+  </article>
+  <article class="kpi kpi-morado">
+    <div class="ed-label">Esperando confirmación</div>
+    <p class="kpi-numero">{{ datos.ticketsEsperandoAprobacion() }}</p>
+    <small>Cotizados, pendientes de respuesta del cliente</small>
+  </article>
+  <article class="kpi kpi-verde">
+    <div class="ed-label">Ingresos (reparados y entregados)</div>
+    <p class="kpi-numero">S/ {{ datos.ingresosTotales().toFixed(2) }}</p>
+    <small>Total acumulado de servicios</small>
+  </article>
+</section>
+
+<!-- Búsqueda y filtro -->
+<div class="barra-herramientas">
+  <input type="search" class="ed-input buscador" aria-label="Buscar tickets"
+         placeholder="Buscar por código Tek, modelo, N° de serie o cliente"
+         [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)">
+  <select class="ed-input filtro" aria-label="Filtrar por estado"
+          [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+    <option value="">Todos los estados</option>
+    @for (e of estados; track e.valor) {
+      <option [value]="e.valor">{{ e.valor }}</option>
+    }
+  </select>
+</div>
+
+<!-- Botones para responder una cotización (se reutilizan en tabla, tarjetas y detalle) -->
+<ng-template #respuestaCotizacion let-t>
+  <div class="acciones">
+    <button type="button" class="btn-ed-ok btn-sm" title="El cliente aceptó el presupuesto"
+            (click)="$event.stopPropagation(); cambiarEstado(t, 'Aprobado / En Reparación')">
+      ✔ Aprobó
+    </button>
+    <button type="button" class="btn-ed-peligro btn-sm" title="El cliente rechazó el presupuesto"
+            (click)="$event.stopPropagation(); cambiarEstado(t, 'Rechazado / Devuelto')">
+      ✖ Rechazó
+    </button>
+  </div>
+</ng-template>
+
+<!-- ============ Escritorio: tabla ============ -->
+<div class="ed-card vista-tabla">
+  <div class="tabla-wrap">
+    <table class="ed-table">
+      <thead>
+        <tr>
+          <th>Ticket</th>
+          <th>Equipo</th>
+          <th>Cliente</th>
+          <th>Último avance</th>
+          <th>Estado</th>
+          <th>Importe</th>
+          <th class="der">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (t of ticketsFiltrados(); track t.idTicket) {
+          <tr class="fila-click" (click)="verDetalle(t)">
+            <td class="texto-suave">#{{ t.idTicket }}</td>
+            <td>
+              <span class="ed-code-badge">{{ t.equipo.codigotek }}</span>
+              <div class="texto-fuerte mt-xs">{{ t.equipo.marcaModelo }}</div>
+              @if (t.equipo.numeroSerie) {
+                <div class="texto-suave">S/N: {{ t.equipo.numeroSerie }}</div>
+              }
+            </td>
+            <td>
+              <div class="texto-fuerte">{{ t.equipo.cliente.nombreCompleto }}</div>
+              <div class="texto-suave">{{ t.equipo.cliente.telefono }}</div>
+            </td>
+            <td class="celda-larga">
+              <div class="texto-suave">{{ etiquetaAvance(t) }}</div>
+              <div class="clamp-2">{{ textoAvance(t) }}</div>
+            </td>
+            <td>
+              <app-estado [estado]="t.estado" />
+              @if (t.estado === 'Esperando Aprobación') {
+                <div class="mt-xs">
+                  <ng-container *ngTemplateOutlet="respuestaCotizacion; context: { $implicit: t }" />
+                </div>
+              }
+            </td>
+            <td class="importe">{{ t.precio | soles }}</td>
+            <td class="der">
+              <div class="acciones" style="justify-content: flex-end">
+                <button type="button" class="btn-ed-outline btn-sm" (click)="$event.stopPropagation(); verDetalle(t)">Ver</button>
+                <button type="button" class="btn-ed-outline btn-sm" (click)="$event.stopPropagation(); editar(t)">Editar</button>
+              </div>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ Móvil y tablet: tarjetas ============ -->
+<div class="vista-tarjetas">
+  @for (t of ticketsFiltrados(); track t.idTicket) {
+    <article class="tarjeta-item clicable" (click)="verDetalle(t)">
+      <div class="tarjeta-fila">
+        <span class="ed-code-badge">{{ t.equipo.codigotek }}</span>
+        <app-estado [estado]="t.estado" />
+      </div>
+      <h3 class="tarjeta-titulo">{{ t.equipo.marcaModelo }}</h3>
+      <p class="tarjeta-sub">{{ t.equipo.cliente.nombreCompleto }}</p>
+      <div>
+        <span class="texto-suave">{{ etiquetaAvance(t) }}</span>
+        <p class="tarjeta-texto clamp-2">{{ textoAvance(t) }}</p>
+      </div>
+      <div class="tarjeta-fila">
+        <span class="texto-suave">Ticket #{{ t.idTicket }}</span>
+        <span class="importe">{{ t.precio | soles }}</span>
+      </div>
+      @if (t.estado === 'Esperando Aprobación') {
+        <ng-container *ngTemplateOutlet="respuestaCotizacion; context: { $implicit: t }" />
+      }
+    </article>
+  }
+</div>
+
+@if (ticketsFiltrados().length === 0 && !datos.cargando()) {
+  <p class="estado-vacio">
+    @if (datos.tickets().length === 0) {
+      Aún no hay tickets. Usa «+ Nuevo ticket» para registrar el primero.
+    } @else {
+      Ningún ticket coincide con la búsqueda.
+    }
+  </p>
+}
+
+<!-- ============ Detalle del ticket ============ -->
+@if (ticketDetalle(); as t) {
+  <app-modal [titulo]="'Ticket #' + t.idTicket" [lateral]="true" (cerrar)="cerrarDetalle()">
+
+    <div class="detalle-estado">
+      <app-estado [estado]="t.estado" />
+      <span class="importe">{{ t.precio | soles }}</span>
+    </div>
+
+    @if (t.estado === 'Esperando Aprobación') {
+      <p class="ayuda" style="margin: 0 0 0.5rem">Cotización enviada. Registra la respuesta del cliente:</p>
+      <ng-container *ngTemplateOutlet="respuestaCotizacion; context: { $implicit: t }" />
+    }
+
+    <dl class="datos">
+      <div>
+        <dt>Equipo</dt>
+        <dd>{{ t.equipo.marcaModelo }} ({{ t.equipo.tipo }})</dd>
+      </div>
+      <div>
+        <dt>Código Tek</dt>
+        <dd><span class="ed-code-badge">{{ t.equipo.codigotek }}</span></dd>
+      </div>
+      <div>
+        <dt>N° de serie</dt>
+        <dd>{{ t.equipo.numeroSerie || 'Sin registrar' }}</dd>
+      </div>
+      <div>
+        <dt>Técnico asignado</dt>
+        <dd>{{ t.tecnico?.nombre || 'Sin asignar' }}</dd>
+      </div>
+      <div>
+        <dt>Cliente</dt>
+        <dd>{{ t.equipo.cliente.nombreCompleto }}</dd>
+      </div>
+      <div>
+        <dt>Teléfono</dt>
+        <dd><a [href]="'tel:' + t.equipo.cliente.telefono">{{ t.equipo.cliente.telefono }}</a></dd>
+      </div>
+      @if (t.equipo.detallesTecnicos) {
+        <div class="completo">
+          <dt>Especificaciones</dt>
+          <dd>{{ t.equipo.detallesTecnicos }}</dd>
+        </div>
+      }
+    </dl>
+
+    <h3 class="seccion-titulo">Bitácora técnica</h3>
+    <div class="bitacora">
+      <details class="bitacora-item bitacora-falla" [open]="etapaActual(t) === 'falla'">
+        <summary class="bitacora-resumen">
+          <span class="bitacora-titulo">Falla reportada por el cliente</span>
+          <span class="bitacora-preview">{{ t.problemaReportado }}</span>
+        </summary>
+        <p class="bitacora-texto">{{ t.problemaReportado }}</p>
+      </details>
+
+      <details class="bitacora-item bitacora-diagnostico" [open]="etapaActual(t) === 'diagnostico'">
+        <summary class="bitacora-resumen">
+          <span class="bitacora-titulo">Diagnóstico y cotización</span>
+          <span class="bitacora-preview">{{ t.diagnosticoFinal || 'Aún sin registrar' }}</span>
+        </summary>
+        @if (t.diagnosticoFinal) {
+          <p class="bitacora-texto">{{ t.diagnosticoFinal }}</p>
+        } @else {
+          <p class="bitacora-texto bitacora-vacia">Aún sin registrar.</p>
+        }
+      </details>
+
+      <details class="bitacora-item bitacora-solucion" [open]="etapaActual(t) === 'solucion'">
+        <summary class="bitacora-resumen">
+          <span class="bitacora-titulo">Solución aplicada y trabajo final</span>
+          <span class="bitacora-preview">{{ t.solucionAplicada || 'Aún sin registrar' }}</span>
+        </summary>
+        @if (t.solucionAplicada) {
+          <p class="bitacora-texto">{{ t.solucionAplicada }}</p>
+        } @else {
+          <p class="bitacora-texto bitacora-vacia">Aún sin registrar.</p>
+        }
+      </details>
+    </div>
+
+    <div pie class="acciones-pie">
+      <button type="button" class="btn-ed-peligro alejar" (click)="eliminar(t)">Eliminar</button>
+      <button type="button" class="btn-ed-primary" (click)="editar(t)">Editar ticket</button>
+    </div>
+  </app-modal>
+}
+
+<!-- ============ Formulario: crear / editar ============ -->
+@if (formularioAbierto()) {
+  <app-modal [titulo]="modoEdicion() ? 'Editar ticket #' + idEditando() : 'Nuevo ticket'" (cerrar)="cerrarFormulario()">
+
+    <form id="form-ticket" #f="ngForm" class="form-grid dos" (ngSubmit)="guardar()">
+
+      <h3 class="form-seccion span-2">Equipo y responsable</h3>
+
+      <div class="span-2">
+        <label class="ed-label" for="t-equipo">Equipo</label>
+        <select id="t-equipo" class="ed-input" name="equipo" required [(ngModel)]="form.idEquipo">
+          @for (eq of datos.equipos(); track eq.idEquipo) {
+            <option [ngValue]="eq.idEquipo">{{ eq.codigotek }} | {{ eq.marcaModelo }} ({{ eq.cliente.nombreCompleto }})</option>
+          }
+        </select>
+        @if (datos.equipos().length === 0) {
+          <p class="ayuda">Todavía no hay equipos registrados. Primero agrega uno en la sección Equipos.</p>
+        }
+      </div>
+
+      <div class="span-2">
+        <label class="ed-label" for="t-tecnico">Técnico</label>
+        <select id="t-tecnico" class="ed-input" name="tecnico" required [(ngModel)]="form.idTecnico">
+          @for (tec of datos.tecnicos(); track tec.idTecnico) {
+            <option [ngValue]="tec.idTecnico">{{ tec.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="ed-label" for="t-estado">Estado</label>
+        <select id="t-estado" class="ed-input" name="estado" [(ngModel)]="form.estado">
+          @for (e of estados; track e.valor) {
+            <option [value]="e.valor">{{ e.etiqueta }}</option>
+          }
+        </select>
+      </div>
+
+      <div>
+        <label class="ed-label" for="t-precio">Importe (S/)</label>
+        <input id="t-precio" type="number" step="0.01" min="0" inputmode="decimal" class="ed-input"
+               name="precio" placeholder="0.00" [(ngModel)]="form.precio">
+      </div>
+
+      <h3 class="form-seccion span-2">Bitácora técnica</h3>
+
+      <div class="span-2">
+        <label class="ed-label" for="t-falla">Falla reportada por el cliente</label>
+        <textarea id="t-falla" class="ed-input" rows="3" name="problema" required
+                  placeholder="Ej. El teclado no responde" [(ngModel)]="form.problemaReportado"></textarea>
+      </div>
+
+      <div class="span-2">
+        <label class="ed-label" for="t-diagnostico">Diagnóstico y cotización</label>
+        <textarea id="t-diagnostico" class="ed-input" rows="3" name="diagnostico"
+                  placeholder="Ej. Se limpió con limpiador de contacto y sigue fallando" [(ngModel)]="form.diagnosticoFinal"></textarea>
+      </div>
+
+      <div class="span-2">
+        <label class="ed-label" for="t-solucion">Solución aplicada y trabajo final</label>
+        <textarea id="t-solucion" class="ed-input" rows="3" name="solucion"
+                  placeholder="Ej. Se cambió el teclado original y quedó operativo" [(ngModel)]="form.solucionAplicada"></textarea>
+      </div>
+    </form>
+
+    <div pie class="acciones-pie">
+      <button type="button" class="btn-ed-outline" (click)="cerrarFormulario()">Cancelar</button>
+      <button type="submit" form="form-ticket" class="btn-ed-primary" [disabled]="guardando() || f.invalid">
+        {{ modoEdicion() ? 'Guardar cambios' : 'Registrar ticket' }}
+      </button>
+    </div>
+  </app-modal>
+}

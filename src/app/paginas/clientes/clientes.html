@@ -1,0 +1,98 @@
+<header class="pagina-cabecera">
+  <div>
+    <h1>Clientes</h1>
+    <p class="subtitulo">Directorio de clientes del taller.</p>
+  </div>
+  <button type="button" class="btn-ed-primary" (click)="nuevo()">+ Nuevo cliente</button>
+</header>
+
+<div class="barra-herramientas">
+  <input type="search" class="ed-input buscador" aria-label="Buscar clientes"
+         placeholder="Buscar por nombre, teléfono o correo"
+         [ngModel]="busqueda()" (ngModelChange)="busqueda.set($event)">
+</div>
+
+<!-- Escritorio: tabla -->
+<div class="ed-card vista-tabla">
+  <div class="tabla-wrap">
+    <table class="ed-table">
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Teléfono</th>
+          <th>Correo</th>
+          <th class="der">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of clientesFiltrados(); track c.idCliente) {
+          <tr>
+            <td class="texto-fuerte">{{ c.nombreCompleto }}</td>
+            <td>{{ c.telefono }}</td>
+            <td>{{ c.email || 'Sin registrar' }}</td>
+            <td class="der">
+              <button type="button" class="btn-ed-outline btn-sm" (click)="editar(c)">Editar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Móvil y tablet: tarjetas -->
+<div class="vista-tarjetas">
+  @for (c of clientesFiltrados(); track c.idCliente) {
+    <article class="tarjeta-item">
+      <h3 class="tarjeta-titulo">{{ c.nombreCompleto }}</h3>
+      <p class="tarjeta-sub"><a class="importe" [href]="'tel:' + c.telefono">{{ c.telefono }}</a></p>
+      @if (c.email) {
+        <p class="tarjeta-sub">{{ c.email }}</p>
+      }
+      <div class="acciones">
+        <button type="button" class="btn-ed-outline btn-sm" (click)="editar(c)">Editar</button>
+      </div>
+    </article>
+  }
+</div>
+
+@if (clientesFiltrados().length === 0 && !datos.cargando()) {
+  <p class="estado-vacio">
+    @if (datos.clientes().length === 0) {
+      Aún no hay clientes. Usa «+ Nuevo cliente» para registrar el primero.
+    } @else {
+      Ningún cliente coincide con la búsqueda.
+    }
+  </p>
+}
+
+<!-- Formulario: crear / editar -->
+@if (formularioAbierto()) {
+  <app-modal [titulo]="modoEdicion() ? 'Editar cliente #' + idEditando() : 'Nuevo cliente'" (cerrar)="cerrarFormulario()">
+
+    <form id="form-cliente" #f="ngForm" class="form-grid" (ngSubmit)="guardar()">
+      <div>
+        <label class="ed-label" for="c-nombre">Nombre completo</label>
+        <input id="c-nombre" type="text" class="ed-input" name="nombreCliente" required
+               placeholder="Ej. María López" [(ngModel)]="form.nombreCompleto">
+      </div>
+      <div>
+        <label class="ed-label" for="c-telefono">Teléfono o WhatsApp</label>
+        <input id="c-telefono" type="tel" class="ed-input" name="telefonoCliente" required
+               placeholder="Ej. 999888777" [(ngModel)]="form.telefono">
+      </div>
+      <div>
+        <label class="ed-label" for="c-email">Correo electrónico</label>
+        <input id="c-email" type="email" class="ed-input" name="emailCliente"
+               placeholder="cliente@correo.com" [(ngModel)]="form.email">
+      </div>
+    </form>
+
+    <div pie class="acciones-pie">
+      <button type="button" class="btn-ed-outline" (click)="cerrarFormulario()">Cancelar</button>
+      <button type="submit" form="form-cliente" class="btn-ed-primary" [disabled]="guardando() || f.invalid">
+        {{ modoEdicion() ? 'Guardar cambios' : 'Guardar cliente' }}
+      </button>
+    </div>
+  </app-modal>
+}

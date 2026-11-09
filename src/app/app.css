@@ -1,333 +1,161 @@
 :host {
-  --ed-bg-main: #0b1120;       /* Fondo principal azul noche profundo */
-  --ed-bg-card: #151f32;       /* Fondo de tarjetas y paneles */
-  --ed-bg-input: #0f172a;      /* Fondo de inputs y cajas de texto */
-  --ed-border: #26354d;        /* Bordes sutiles */
-  --ed-blue: #007bdf;          /* Azul principal EDteam */
-  --ed-blue-hover: #0062b3;
-  --ed-cyan: #00e5ff;          /* Acento cian brillante */
-  --ed-text: #f8fafc;          /* Texto blanco suave */
-  --ed-text-muted: #94a3b8;    /* Texto secundario gris azulado */
-
   display: block;
   min-height: 100vh;
-  background-color: var(--ed-bg-main);
-  color: var(--ed-text);
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  padding-bottom: 3rem;
 }
 
-/* Navbar superior con efecto cristal (Glassmorphism) */
-.ed-navbar {
-  background-color: rgba(15, 23, 42, 0.88);
-  backdrop-filter: blur(12px);
-  border-bottom: 1px solid var(--ed-border);
-  padding: 0.85rem 0;
+/* ===== Escritorio: barra lateral + contenido ===== */
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
 }
 
-.ed-brand {
-  font-weight: 800;
-  font-size: 1.25rem;
-  letter-spacing: -0.5px;
-  color: #ffffff;
+.topbar-movil { display: none; }
+
+.sidebar {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.25rem 0.9rem;
+  background-color: var(--ed-bg-side);
+  border-right: 1px solid var(--ed-border);
+}
+
+.brand {
   display: flex;
   align-items: center;
   gap: 0.6rem;
+  padding: 0 0.4rem;
+  text-decoration: none;
 }
 
-.ed-brand-badge {
+.brand-nombre {
+  font-weight: 800;
+  font-size: 1.1rem;
+  letter-spacing: -0.5px;
+  color: #ffffff;
+}
+
+.brand-azul { color: var(--ed-blue); }
+
+.brand-badge {
   background: linear-gradient(135deg, var(--ed-blue), var(--ed-cyan));
   color: #0b1120;
   font-size: 0.7rem;
   font-weight: 800;
   padding: 0.15rem 0.5rem;
   border-radius: 6px;
-  text-transform: uppercase;
 }
 
-/* Pestañas de navegación */
-.ed-nav-btn {
-  background: transparent;
-  color: var(--ed-text-muted);
-  border: 1px solid transparent;
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.65rem 0.8rem;
   border-radius: 8px;
-  padding: 0.45rem 1rem;
-  font-size: 0.875rem;
+  border: 1px solid transparent;
+  color: var(--ed-text-muted);
+  font-size: 0.9rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  text-decoration: none;
+  transition: background-color 0.15s, color 0.15s;
 }
 
-.ed-nav-btn:hover {
+.menu-item:hover {
   color: var(--ed-text);
   background-color: rgba(255, 255, 255, 0.05);
 }
 
-.ed-nav-btn.active {
-  background-color: rgba(0, 123, 223, 0.15);
+.menu-item.activo {
   color: var(--ed-cyan);
+  background-color: rgba(0, 123, 223, 0.15);
   border-color: rgba(0, 229, 255, 0.3);
 }
 
-/* Tarjetas de Estadísticas Rápidas (KPIs) */
-.ed-stat-card {
-  background: linear-gradient(180deg, var(--ed-bg-card) 0%, rgba(21, 31, 50, 0.7) 100%);
-  border: 1px solid var(--ed-border);
-  border-radius: 12px;
-  padding: 1rem 1.25rem;
+.menu-icono { font-size: 1.1rem; }
+
+.contenido {
+  min-width: 0;
+  padding: 1.75rem 2rem 3rem;
+}
+
+/* ===== Avisos de conexión ===== */
+.aviso {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: space-between;
-}
-
-.ed-stat-number {
-  font-size: 1.6rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-/* Tarjetas de Formularios y Contenedores */
-.ed-card {
+  gap: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--ed-border);
+  border-radius: 10px;
   background-color: var(--ed-bg-card);
-  border: 1px solid var(--ed-border);
-  border-radius: 12px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
-  overflow: hidden;
-}
-
-.ed-card-header {
-  background-color: rgba(15, 23, 42, 0.5);
-  border-bottom: 1px solid var(--ed-border);
-  padding: 1rem 1.25rem;
-  font-weight: 700;
-  font-size: 0.95rem;
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* Inputs, Selects y Textareas oscuros */
-.ed-label {
   color: var(--ed-text-muted);
-  font-size: 0.78rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
 }
 
-.ed-input, .ed-select {
-  background-color: var(--ed-bg-input) !important;
-  border: 1px solid var(--ed-border) !important;
-  color: var(--ed-text) !important;
-  border-radius: 8px;
-  padding: 0.55rem 0.85rem;
-  font-size: 0.9rem;
-  transition: border-color 0.2s, box-shadow 0.2s;
+.aviso-error {
+  color: #fecaca;
+  border-color: rgba(239, 68, 68, 0.4);
+  background-color: rgba(239, 68, 68, 0.08);
 }
 
-.ed-input::placeholder {
-  color: #475569 !important;
-}
+/* ===== Móvil y tablet: barra superior + menú inferior ===== */
+@media (max-width: 991.98px) {
+  .shell { display: block; }
 
-.ed-input:focus, .ed-select:focus {
-  border-color: var(--ed-blue) !important;
-  box-shadow: 0 0 0 3px rgba(0, 123, 223, 0.25) !important;
-  outline: none;
-}
+  .topbar-movil {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    position: sticky;
+    top: 0;
+    z-index: 30;
+    padding: 0.8rem 1rem;
+    padding-top: calc(0.8rem + env(safe-area-inset-top));
+    background-color: rgba(13, 21, 38, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--ed-border);
+  }
 
-/* Botones principales estilo EDteam */
-.btn-ed-primary {
-  background: linear-gradient(135deg, #007bdf 0%, #0062b3 100%);
-  color: #ffffff;
-  border: none;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: transform 0.15s ease, box-shadow 0.2s ease;
-}
+  .sidebar {
+    position: fixed;
+    inset: auto 0 0 0;
+    height: auto;
+    z-index: 40;
+    flex-direction: row;
+    padding: 0.35rem 0.5rem calc(0.35rem + env(safe-area-inset-bottom));
+    border-right: 0;
+    border-top: 1px solid var(--ed-border);
+  }
 
-.btn-ed-primary:hover {
-  background: linear-gradient(135deg, #0088f7 0%, #007bdf 100%);
-  color: #ffffff;
-  box-shadow: 0 4px 14px rgba(0, 123, 223, 0.4);
-  transform: translateY(-1px);
-}
+  .brand { display: none; }
 
-.btn-ed-outline {
-  background: transparent;
-  color: var(--ed-text-muted);
-  border: 1px solid var(--ed-border);
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.85rem;
-}
+  .menu {
+    flex-direction: row;
+    width: 100%;
+    gap: 0.2rem;
+  }
 
-.btn-ed-outline:hover {
-  background-color: rgba(255, 255, 255, 0.05);
-  color: #ffffff;
-  border-color: #475569;
-}
+  .menu-item {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.1rem;
+    padding: 0.4rem 0.2rem;
+    font-size: 0.72rem;
+  }
 
-/* Tabla oscura moderna */
-.ed-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 0;
-  color: var(--ed-text);
-  margin-bottom: 0;
-}
+  .menu-icono { font-size: 1.3rem; }
 
-.ed-table thead th {
-  background-color: #0f172a;
-  color: var(--ed-text-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.9rem 1rem;
-  border-bottom: 1px solid var(--ed-border);
-}
-
-.ed-table tbody td {
-  padding: 1rem;
-  border-bottom: 1px solid rgba(38, 53, 77, 0.5);
-  vertical-align: middle;
-  font-size: 0.9rem;
-}
-
-.ed-table tbody tr:hover {
-  background-color: rgba(0, 123, 223, 0.06);
-}
-
-/* Etiquetas (Pills) translúcidas para Código Tek y Estados */
-.ed-code-badge {
-  background-color: rgba(0, 229, 255, 0.1);
-  color: var(--ed-cyan);
-  border: 1px solid rgba(0, 229, 255, 0.25);
-  font-family: monospace;
-  font-size: 0.8rem;
-  font-weight: 700;
-  padding: 0.2rem 0.55rem;
-  border-radius: 6px;
-  display: inline-block;
-}
-
-.ed-status {
-  padding: 0.3rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  display: inline-block;
-}
-
-.status-ingresado {
-  background-color: rgba(148, 163, 184, 0.15);
-  color: #cbd5e1;
-  border: 1px solid rgba(148, 163, 184, 0.3);
-}
-
-.status-diagnostico {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-}
-
-.status-reparado {
-  background-color: rgba(0, 229, 255, 0.15);
-  color: #00e5ff;
-  border: 1px solid rgba(0, 229, 255, 0.35);
-}
-
-.status-entregado {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-}
-
-.status-esperando {
-  background-color: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.35);
-}
-
-.status-aprobado {
-  background-color: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-  border: 1px solid rgba(59, 130, 246, 0.35);
-}
-
-.status-rechazado {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.35);
-}
-
-/* Bloques de historial técnico dentro de la tabla */
-.ed-tech-log {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-  min-width: 260px;
-  max-width: 100%;
-}
-
-.ed-log-item {
-  background-color: rgba(15, 23, 42, 0.65);
-  border-radius: 6px;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.82rem;
-  line-height: 1.45;
-  white-space: pre-line; /* Respeta los Enter que escribas en el textarea */
-  border-left: 3px solid #64748b;
-}
-
-.ed-log-title {
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  display: block;
-  margin-bottom: 0.2rem;
-}
-
-.log-falla {
-  border-left-color: #f87171;
-}
-.log-falla .ed-log-title { color: #f87171; }
-
-.log-diagnostico {
-  border-left-color: #fbbf24;
-}
-.log-diagnostico .ed-log-title { color: #fbbf24; }
-
-.log-solucion {
-  border-left-color: #34d399;
-  background-color: rgba(16, 185, 129, 0.08);
-}
-.log-solucion .ed-log-title { color: #34d399; }
-
-/* Optimización de altura para que todo entre en pantalla */
-.ed-stat-card {
-  padding: 0.7rem 1.1rem !important;
-}
-
-.ed-stat-number {
-  font-size: 1.35rem !important;
-}
-
-.ed-table tbody td {
-  padding: 0.75rem 0.85rem !important;
-}
-
-.ed-log-item {
-  padding: 0.4rem 0.65rem !important;
-  font-size: 0.8rem !important;
-}
-
-/* Fija el formulario izquierdo al hacer scroll en la tabla */
-.ed-sticky-form {
-  position: sticky;
-  top: 72px;
+  .contenido { padding: 1.1rem 1rem 6.5rem; }
 }
